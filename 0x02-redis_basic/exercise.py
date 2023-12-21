@@ -21,6 +21,42 @@ def count_calls(method: Callable) -> Callable:
     return wrapper
 
 
+def call_history(method: Callable) -> Callable:
+    """keep tab of inputs and outputs"""
+    @wraps(method)
+    def wrapper(self, *args, **kwargs):
+        """method name"""
+        key = method.__qualname__
+        inputslist_key = key + ":inputs"
+        outputslist_key = key + ":outputs"
+        input_str = str(args)
+        self._redis.rpush(inputslist_key, input_str)
+        output = method(self, *args, **kwargs)
+        self._redis.rpush(outputslist_key, str(output))
+        return output
+    return wrapper
+
+
+def replay(method: Callable) -> None:
+    """display call history of a particular func"""
+    cache = redis.Redis()
+
+    method_name = method.__qualname__
+    counter = cache.get(method_name).decode('utf-8')
+    # retrieve input output list
+    inputslist_key = f"{method_name}:inputs"
+    outputslist_key = f"{method_name}:outputs"
+    inputs_history = cache.lrange(inputslist_key, 0, -1)
+    outputs_history = cache.lrange(outputslist_key, 0, -1)
+    print(f"{method_name} was called {counter} times")
+    # loop through using zip
+    for input_str, output_str in zip(inputs_history, outputs_history):
+        # Convert byte strings to UTF-8
+        input_str = input_str.decode('utf-8')
+        output_str = output_str.decode('utf-8')
+        print(f"{method_name}(*{input_str}) -> {output_str}")
+
+
 class Cache():
     """
     connect to redis server and store key-value pairs
@@ -33,6 +69,7 @@ class Cache():
         self._redis = redis.Redis(host='localhost', port=6379)
         self._redis.flushdb()
 
+    @call_history
     @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """generate random key using uuid, store data as key's value"""
