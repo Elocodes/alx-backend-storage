@@ -46,6 +46,7 @@ def cache_and_count_access(func):
     """count access"""
     @wraps(func)
     def wrapper(url):
+        """methods"""
         count_key = f"count:{url}"
 
         # Increment the count
@@ -78,14 +79,13 @@ def get_page_with_decorator(url: str) -> str:
     return response.text
 
 
-"""
 if __name__ == "__main__":
     # Example usage of get_page function
-    = "http://slowwly.robertomurray.co.uk/delay/5000/url/http://www.google.com"
+    slow_url = "http://slowwly.robertomurray.co.uk"
     content = get_page(slow_url)
     print(content)
 
     # Example usage of get_page_with_decorator function
     fast_url = "http://www.google.com"
     decorated_content = get_page_with_decorator(fast_url)
-    print(decorated_content)"""
+    print(decorated_content)
