@@ -10,6 +10,7 @@ import time
 # Create a Redis connection
 redis_conn = redis.Redis()
 
+
 def get_page(url: str) -> str:
     """Get HTML content of a URL with caching and access count."""
     # Create a key for counting URL accesses
@@ -26,7 +27,8 @@ def get_page(url: str) -> str:
     # Check if the HTML content is cached
     cached_content = redis_conn.get(url)
     if cached_content:
-        print(f"URL '{url}' accessed {access_count} times. Returning cached content.")
+        print(f"URL '{url}' accessed {access_count} times.
+              Returning cached content.")
         return cached_content.decode('utf-8')
 
     # Make a request to the URL
@@ -38,8 +40,10 @@ def get_page(url: str) -> str:
     print(f"URL '{url}' accessed {access_count} times. Caching content.")
     return response.text
 
+
 # Bonus: Decorator implementation
 def cache_and_count_access(func):
+    """count access"""
     @wraps(func)
     def wrapper(url):
         count_key = f"count:{url}"
@@ -50,7 +54,8 @@ def cache_and_count_access(func):
         # Check if the HTML content is cached
         cached_content = redis_conn.get(url)
         if cached_content:
-            print(f"URL '{url}' accessed {access_count} times. Returning cached content.")
+            print(f"URL '{url}' accessed {access_count} times.
+                  Returning cached content.")
             return cached_content.decode('utf-8')
 
         # Call the original function
@@ -64,21 +69,23 @@ def cache_and_count_access(func):
 
     return wrapper
 
+
 @cache_and_count_access
 def get_page_with_decorator(url: str) -> str:
-    """Get HTML content of a URL with caching and access count using a decorator."""
+    """Get HTML content of a URL with caching and access using a decorator."""
     # Make a request to the URL
     response = requests.get(url)
     return response.text
 
+
+"""
 if __name__ == "__main__":
     # Example usage of get_page function
-    slow_url = "http://slowwly.robertomurray.co.uk/delay/5000/url/http://www.google.com"
+    = "http://slowwly.robertomurray.co.uk/delay/5000/url/http://www.google.com"
     content = get_page(slow_url)
     print(content)
 
     # Example usage of get_page_with_decorator function
     fast_url = "http://www.google.com"
     decorated_content = get_page_with_decorator(fast_url)
-    print(decorated_content)
-
+    print(decorated_content)"""
